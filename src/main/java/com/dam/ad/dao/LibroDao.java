@@ -2,25 +2,25 @@ package com.dam.ad.dao;
 
 import com.dam.ad.db.Db;
 import com.dam.ad.model.Libro;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class LibroDao {
-
+    // Columnas que se leen en todas las consultas SELECT
+    private static final String COLUMNAS = "id, titulo, isbn, anio, disponible, autor_id";
     private Libro mapRow(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String titulo = rs.getString("titulo");
         String isbn = rs.getString("isbn");
-        Integer anio = (Integer) rs.getObject("anio"); // admite NULL
+        Integer anio = (Integer) rs.getObject("anio");          // admite NULL
         boolean disponible = rs.getBoolean("disponible");
-        return new Libro(id, titulo, isbn, anio, disponible);
+        Integer autorId = (Integer) rs.getObject("autor_id");   // admite NULL
+        return new Libro(id, titulo, isbn, anio, disponible, autorId);
     }
-
     public List<Libro> findAll() {
-        String sql = "SELECT id, titulo, isbn, anio, disponible FROM libro ORDER BY id";
+        String sql = "SELECT " + COLUMNAS + " FROM libro ORDER BY id";
 
         try (Connection con = Db.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -31,18 +31,15 @@ public class LibroDao {
                 libros.add(mapRow(rs));
             }
             return libros;
-
         } catch (SQLException e) {
             throw new RuntimeException("Error leyendo libros", e);
         }
     }
-
     public Optional<Libro> findById(int id) {
-        String sql = "SELECT id, titulo, isbn, anio, disponible FROM libro WHERE id = ?";
+        String sql = "SELECT " + COLUMNAS + " FROM libro WHERE id = ?";
 
         try (Connection con = Db.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setInt(1, id);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -51,28 +48,44 @@ public class LibroDao {
                 }
                 return Optional.empty();
             }
-
         } catch (SQLException e) {
             throw new RuntimeException("Error buscando libro por id=" + id, e);
         }
     }
+    public List<Libro> findByAutorId(int autorId) {
+        String sql = "SELECT " + COLUMNAS + " FROM libro WHERE autor_id = ? ORDER BY id";
 
+        try (Connection con = Db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, autorId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                List<Libro> libros = new ArrayList<>(); // vacía si no hay resultados
+                while (rs.next()) {
+                    libros.add(mapRow(rs));
+                }
+                return libros;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error buscando libros del autor id=" + autorId, e);
+        }
+    }
     public int insert(Libro libro) {
-        String sql = "INSERT INTO libro (titulo, isbn, anio, disponible) VALUES (?,?,?,?)";
+        String sql = "INSERT INTO libro (titulo, isbn, anio, disponible, autor_id) VALUES (?,?,?,?,?)";
 
         try (Connection con = Db.getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, libro.getTitulo());
             ps.setString(2, libro.getIsbn());
-            ps.setObject(3, libro.getAnio()); // admite NULL
+            ps.setObject(3, libro.getAnio());      // admite NULL
             ps.setBoolean(4, libro.isDisponible());
+            ps.setObject(5, libro.getAutorId());   // admite NULL
 
             int rows = ps.executeUpdate();
             if (rows != 1) {
                 throw new SQLException("INSERT inesperado. Filas afectadas: " + rows);
             }
-
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
                     int id = keys.getInt(1);
@@ -81,18 +94,15 @@ public class LibroDao {
                 }
                 throw new SQLException("No se devolvió id generado (getGeneratedKeys vacío)");
             }
-
         } catch (SQLException e) {
             throw new RuntimeException("Error insertando libro", e);
         }
     }
-
     public boolean update(Libro libro) {
         if (libro.getId() == null) {
             throw new IllegalArgumentException("No se puede UPDATE sin id. ¿Hiciste insert primero?");
         }
-
-        String sql = "UPDATE libro SET titulo=?, isbn=?, anio=?, disponible=? WHERE id=?";
+        String sql = "UPDATE libro SET titulo=?, isbn=?, anio=?, disponible=?, autor_id=? WHERE id=?";
 
         try (Connection con = Db.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -101,24 +111,21 @@ public class LibroDao {
             ps.setString(2, libro.getIsbn());
             ps.setObject(3, libro.getAnio());
             ps.setBoolean(4, libro.isDisponible());
-            ps.setInt(5, libro.getId());
+            ps.setObject(5, libro.getAutorId());
+            ps.setInt(6, libro.getId());
 
             return ps.executeUpdate() == 1;
-
         } catch (SQLException e) {
             throw new RuntimeException("Error actualizando libro id=" + libro.getId(), e);
         }
     }
-
     public boolean deleteById(int id) {
         String sql = "DELETE FROM libro WHERE id=?";
 
         try (Connection con = Db.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setInt(1, id);
             return ps.executeUpdate() == 1;
-
         } catch (SQLException e) {
             throw new RuntimeException("Error borrando libro id=" + id, e);
         }
