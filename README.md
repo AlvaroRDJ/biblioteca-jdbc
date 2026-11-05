@@ -12,16 +12,17 @@ Prácticas de **acceso a datos con JDBC** sobre **PostgreSQL**, usando el patró
 ## Estado del proyecto
 
 - [x] **Práctica 1:** conexión JDBC y consulta `SELECT` (`findAll`)
-- [ ] **Práctica 2:** CRUD completo (`findById`, `insert`, `update`, `deleteById`)
+- [x] **Práctica 2:** CRUD completo (`findById`, `insert`, `update`, `deleteById`)
+- [x] **Práctica 3:** ampliación con autores (tabla autor, clave foránea, menú)
 
 ## Estructura
 
 ```
 src/main/java/com/dam/ad
-├── app     → clases con main (Main)
-├── dao     → acceso a datos (LibroDao)
+├── app     → clases con main (Main, CrudDemo, PrepararBaseDatos, PruebaClaveForanea)
+├── dao     → acceso a datos (LibroDao, AutorDao)
 ├── db      → conexión a la base de datos (Db)
-└── model   → modelo de datos (Libro)
+└── model   → modelo de datos (Libro, Autor)
 src/main/resources
 ├── db.properties           → configuración local (NO se sube a Git)
 └── db.properties.example   → plantilla de configuración
