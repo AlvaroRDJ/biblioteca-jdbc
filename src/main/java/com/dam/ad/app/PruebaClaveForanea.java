@@ -1,12 +1,12 @@
 package com.dam.ad.app;
 
-import com.dam.ad.dao.LibroDao;
+import com.dam.ad.repository.jdbc.JdbcLibroRepository;
 import com.dam.ad.model.Libro;
 import java.sql.SQLException;
 
 public class PruebaClaveForanea {
     public static void main(String[] args) {
-        var dao = new LibroDao();
+        var dao = new JdbcLibroRepository();
         int autorInexistente = 999999;
 
         System.out.println("=== PRUEBA NEGATIVA: autor_id inexistente (" + autorInexistente + ") ===");

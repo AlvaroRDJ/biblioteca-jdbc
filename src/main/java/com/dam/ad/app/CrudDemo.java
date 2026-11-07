@@ -1,7 +1,7 @@
 package com.dam.ad.app;
 
 import com.dam.ad.dao.AutorDao;
-import com.dam.ad.dao.LibroDao;
+import com.dam.ad.repository.jdbc.JdbcLibroRepository;
 import com.dam.ad.model.Autor;
 import com.dam.ad.model.Libro;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class CrudDemo {
-    private static final LibroDao libroDao = new LibroDao();
+    private static final JdbcLibroRepository libroDao = new JdbcLibroRepository();
     private static final AutorDao autorDao = new AutorDao();
     private static final Scanner sc = new Scanner(System.in);
 

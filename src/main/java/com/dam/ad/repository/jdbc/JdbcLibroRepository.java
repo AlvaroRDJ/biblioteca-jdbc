@@ -1,13 +1,14 @@
-package com.dam.ad.dao;
+package com.dam.ad.repository.jdbc;
 
 import com.dam.ad.db.Db;
 import com.dam.ad.model.Libro;
+import com.dam.ad.repository.LibroRepository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class LibroDao {
+public class JdbcLibroRepository implements LibroRepository {
     // Columnas que se leen en todas las consultas SELECT
     private static final String COLUMNAS = "id, titulo, isbn, anio, disponible, autor_id";
     private Libro mapRow(ResultSet rs) throws SQLException {
